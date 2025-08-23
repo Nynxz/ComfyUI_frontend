@@ -211,6 +211,22 @@ export function useCoreCommands(): ComfyCommand[] {
       }
     },
     {
+      id: 'Comfy.PauseQueue',
+      icon: 'pi pi-pause',
+      label: 'Pause Queue',
+      category: 'essentials' as const,
+      function: async () => {
+        const res = await api.pause()
+        const isPaused = res.State == 'paused'
+        toastStore.add({
+          severity: isPaused ? 'warn' : 'success',
+          summary: 'Queue ' + (isPaused ? 'Paused' : 'Resumed'),
+          detail: 'The Queue Has Been ' + (isPaused ? 'Paused!' : 'Resumed!'),
+          life: 1000
+        })
+      }
+    },
+    {
       id: 'Comfy.Interrupt',
       icon: 'pi pi-stop',
       label: 'Interrupt',

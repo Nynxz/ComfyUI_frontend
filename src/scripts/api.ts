@@ -849,6 +849,21 @@ export class ComfyApi extends EventTarget {
   }
 
   /**
+   * Toggles the queue status.
+   * Pause / Unpause
+   */
+  async pause() {
+    console.log('Got Paused Command')
+    return (
+      await this.fetchApi('/pause', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+    ).json()
+  }
+  /**
    * Gets user configuration data and where data should be stored
    */
   async getUserConfig(): Promise<User> {

@@ -68,6 +68,18 @@
           }
         "
       />
+
+      <Button
+        v-tooltip.bottom="{
+          value: $t('menu.pause'),
+          showDelay: 600
+        }"
+        icon="pi pi-play"
+        :severity="executingPrompt ? 'primary' : 'danger'"
+        text
+        :aria-label="$t('menu.pause')"
+        @click="() => commandStore.execute('Comfy.PauseQueue')"
+      />
     </ButtonGroup>
   </div>
 </template>

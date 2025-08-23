@@ -539,6 +539,7 @@
     "run": "Run",
     "execute": "Execute",
     "interrupt": "Cancel current run",
+    "pause": "Pause the queue",
     "refresh": "Refresh node definitions",
     "clipspace": "Open Clipspace",
     "resetView": "Reset canvas view",
