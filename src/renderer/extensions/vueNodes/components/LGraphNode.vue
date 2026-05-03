@@ -115,8 +115,13 @@
           :node-data="nodeData"
           :collapsed="isCollapsed"
           :price-badges="badges.pricing"
+          :is-subgraph="!!lgraphNode?.isSubgraphNode()"
+          :show-advanced-inputs-button="showAdvancedInputsButton"
+          :show-advanced-state="showAdvancedState"
           @collapse="handleCollapse"
           @update:title="handleHeaderTitleUpdate"
+          @enter-subgraph="handleEnterSubgraph"
+          @toggle-advanced="handleToggleAdvanced"
         />
       </div>
 
@@ -193,16 +198,10 @@
     </div>
     <NodeFooter
       v-if="!isRerouteNode"
-      :is-subgraph="!!lgraphNode?.isSubgraphNode()"
       :has-any-error="hasAnyError"
       :show-errors-tab-enabled="showErrorsTabEnabled"
-      :show-advanced-inputs-button="showAdvancedInputsButton"
-      :show-advanced-state="showAdvancedState"
-      :header-color="applyLightThemeColor(nodeData?.color)"
       :shape="nodeData.shape"
-      @enter-subgraph="handleEnterSubgraph"
       @open-errors="handleOpenErrors"
-      @toggle-advanced="handleToggleAdvanced"
     />
     <template
       v-if="

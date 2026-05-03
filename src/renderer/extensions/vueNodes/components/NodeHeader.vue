@@ -67,6 +67,39 @@
         class="icon-[comfy--pin] size-5"
         data-testid="node-pin-indicator"
       />
+      <Button
+        v-if="showAdvancedToggle"
+        size="icon-sm"
+        variant="textonly"
+        class="hover:bg-transparent"
+        data-testid="node-header-advanced-button"
+        @click.stop="emit('toggleAdvanced')"
+        @dblclick.stop
+      >
+        <i
+          :class="
+            cn(
+              'size-5 text-node-component-header-icon',
+              showAdvancedState
+                ? 'icon-[lucide--chevron-up]'
+                : 'icon-[lucide--settings-2]'
+            )
+          "
+        />
+      </Button>
+      <Button
+        v-if="isSubgraph"
+        size="icon-sm"
+        variant="textonly"
+        class="hover:bg-transparent"
+        data-testid="node-header-subgraph-button"
+        @click.stop="emit('enterSubgraph')"
+        @dblclick.stop
+      >
+        <i
+          class="icon-[comfy--workflow] size-5 text-node-component-header-icon"
+        />
+      </Button>
     </div>
   </div>
 </template>
@@ -92,14 +125,29 @@ interface NodeHeaderProps {
   nodeData?: VueNodeData
   collapsed?: boolean
   priceBadges?: { required: string; rest?: string }[]
+  isSubgraph?: boolean
+  showAdvancedInputsButton?: boolean
+  showAdvancedState?: boolean
 }
 
-const { nodeData, collapsed } = defineProps<NodeHeaderProps>()
+const {
+  nodeData,
+  collapsed,
+  isSubgraph = false,
+  showAdvancedInputsButton = false,
+  showAdvancedState = false
+} = defineProps<NodeHeaderProps>()
 
 const emit = defineEmits<{
   collapse: []
   'update:title': [newTitle: string]
+  enterSubgraph: []
+  toggleAdvanced: []
 }>()
+
+const showAdvancedToggle = computed(
+  () => !isSubgraph && (showAdvancedInputsButton || showAdvancedState)
+)
 
 // Error boundary implementation
 const renderError = ref<string | null>(null)
