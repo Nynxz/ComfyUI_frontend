@@ -403,6 +403,13 @@ const zSettings = z.object({
   'LiteGraph.Canvas.LowQualityRenderingZoomThreshold': z.number(),
   'Comfy.Toast.DisableReconnectingToast': z.boolean(),
   'Comfy.Workflow.Persist': z.boolean(),
+  'Comfy.Workflow.NewWorkflowMode': z.enum([
+    'blank',
+    'default',
+    'templates',
+    'specific'
+  ]),
+  'Comfy.Workflow.NewWorkflowPath': z.string(),
   'Comfy.TutorialCompleted': z.boolean(),
   'Comfy.InstalledVersion': z.string().nullable(),
   'Comfy.Node.AllowImageSizeDraw': z.boolean(),

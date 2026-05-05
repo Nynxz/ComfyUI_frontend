@@ -1125,6 +1125,28 @@ export const CORE_SETTINGS: SettingParams[] = [
     versionAdded: '1.16.1'
   },
   {
+    id: 'Comfy.Workflow.NewWorkflowMode',
+    name: 'New workflow default',
+    tooltip:
+      'What to show when creating a new workflow or starting the app. To use a specific saved workflow, right-click it in the Workflows sidebar and choose "Set as default".',
+    type: 'combo',
+    options: [
+      { value: 'blank', text: 'Blank graph' },
+      { value: 'default', text: 'Default sampler workflow' },
+      { value: 'templates', text: 'Open templates dialog' },
+      { value: 'specific', text: 'Specific saved workflow' }
+    ],
+    defaultValue: 'blank',
+    versionAdded: '1.45.0'
+  },
+  {
+    id: 'Comfy.Workflow.NewWorkflowPath',
+    name: 'New workflow specific path',
+    type: 'hidden',
+    defaultValue: '',
+    versionAdded: '1.45.0'
+  },
+  {
     id: 'LiteGraph.Node.DefaultPadding',
     name: 'Always shrink new nodes',
     tooltip:

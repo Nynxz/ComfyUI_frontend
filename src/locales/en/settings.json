@@ -463,6 +463,16 @@
   "Comfy_Workflow_Persist": {
     "name": "Persist workflow state and restore on page (re)load"
   },
+  "Comfy_Workflow_NewWorkflowMode": {
+    "name": "New workflow default",
+    "tooltip": "What to show when creating a new workflow or starting the app. To use a specific saved workflow, right-click it in the Workflows sidebar and choose \"Set as default\".",
+    "options": {
+      "blank": "Blank graph",
+      "default": "Default sampler workflow",
+      "templates": "Open templates dialog",
+      "specific": "Specific saved workflow"
+    }
+  },
   "Comfy_Workflow_ShowMissingModelsWarning": {
     "name": "Show missing models warning"
   },
