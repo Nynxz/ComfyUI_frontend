@@ -190,6 +190,10 @@ const workflowTabsPosition = computed(() =>
   settingStore.get('Comfy.Workflow.WorkflowTabsPosition')
 )
 
+const isCurrentDefaultNewWorkflow = (workflow: ComfyWorkflow) =>
+  settingStore.get('Comfy.Workflow.NewWorkflowMode') === 'specific' &&
+  settingStore.get('Comfy.Workflow.NewWorkflowPath') === workflow.path
+
 const searchBoxRef = ref()
 
 const searchQuery = ref('')
@@ -320,7 +324,42 @@ const renderTreeNode = (
                 const workflow = node.data
                 await workflowService.duplicateWorkflow(workflow)
               }
-            }
+            },
+            ...(workflow.isPersisted
+              ? isCurrentDefaultNewWorkflow(workflow)
+                ? [
+                    {
+                      label: t('g.clearDefaultNewWorkflow'),
+                      icon: 'pi pi-times',
+                      command: async () => {
+                        await settingStore.set(
+                          'Comfy.Workflow.NewWorkflowMode',
+                          'blank'
+                        )
+                        await settingStore.set(
+                          'Comfy.Workflow.NewWorkflowPath',
+                          ''
+                        )
+                      }
+                    }
+                  ]
+                : [
+                    {
+                      label: t('g.setAsDefaultNewWorkflow'),
+                      icon: 'pi pi-star',
+                      command: async () => {
+                        await settingStore.set(
+                          'Comfy.Workflow.NewWorkflowMode',
+                          'specific'
+                        )
+                        await settingStore.set(
+                          'Comfy.Workflow.NewWorkflowPath',
+                          workflow.path
+                        )
+                      }
+                    }
+                  ]
+              : [])
           ]
         },
         draggable: true

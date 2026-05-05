@@ -62,6 +62,8 @@
     "extensionName": "Extension Name",
     "reloadToApplyChanges": "Reload to apply changes",
     "insert": "Insert",
+    "setAsDefaultNewWorkflow": "Set as default new workflow",
+    "clearDefaultNewWorkflow": "Clear default new workflow",
     "systemInfo": "System Info",
     "devices": "Devices",
     "about": "About",
@@ -873,7 +875,7 @@
     "noFilesFoundMessage": "Upload files or generate content to see them here",
     "browseTemplates": "Browse example templates",
     "openWorkflow": "Open workflow in local file system",
-    "newBlankWorkflow": "Create a new blank workflow",
+    "newBlankWorkflow": "New workflow",
     "nodeLibraryTab": {
       "essentials": "Essentials",
       "allNodes": "All",
