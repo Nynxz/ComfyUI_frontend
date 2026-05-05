@@ -347,6 +347,13 @@ export const useWorkflowStore = defineStore('workflow', () => {
     } else {
       workflow.unload()
     }
+    // Clear the active reference if it still points to this workflow.
+    // Otherwise a subsequent load at the same path (e.g. reopening the same
+    // template after closing it) would short-circuit `openWorkflow`'s
+    // `isActive` check and never become visible as a new tab.
+    if (activeWorkflow.value?.path === workflow.path) {
+      activeWorkflow.value = null
+    }
   }
 
   /**

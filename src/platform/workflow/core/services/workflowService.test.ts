@@ -60,9 +60,16 @@ function makeWorkflowData(
   }
 }
 
-const { mockConfirm, mockTrackWorkflowSaved } = vi.hoisted(() => ({
-  mockConfirm: vi.fn(),
-  mockTrackWorkflowSaved: vi.fn()
+const { mockConfirm, mockTrackWorkflowSaved, mockCommandExecute } = vi.hoisted(
+  () => ({
+    mockConfirm: vi.fn(),
+    mockTrackWorkflowSaved: vi.fn(),
+    mockCommandExecute: vi.fn()
+  })
+)
+
+vi.mock('@/stores/commandStore', () => ({
+  useCommandStore: () => ({ execute: mockCommandExecute })
 }))
 
 vi.mock('@/services/dialogService', () => ({
@@ -1247,6 +1254,102 @@ describe('useWorkflowService', () => {
       expect(mockConfirm).toHaveBeenCalled()
       expect(workflowStore.renameWorkflow).not.toHaveBeenCalled()
       expect(workflowStore.saveWorkflow).toHaveBeenCalledWith(workflow)
+    })
+  })
+
+  describe('loadConfiguredNewWorkflow', () => {
+    let workflowStore: ReturnType<typeof useWorkflowStore>
+
+    function withSettings(values: Record<string, unknown>) {
+      vi.spyOn(useSettingStore(), 'get').mockImplementation(
+        (key: string) => values[key]
+      )
+    }
+
+    beforeEach(() => {
+      workflowStore = useWorkflowStore()
+      vi.mocked(app.loadGraphData).mockClear()
+      mockCommandExecute.mockClear()
+    })
+
+    it('loads blank graph when mode is "blank"', async () => {
+      withSettings({ 'Comfy.Workflow.NewWorkflowMode': 'blank' })
+
+      await useWorkflowService().loadConfiguredNewWorkflow()
+
+      expect(app.loadGraphData).toHaveBeenCalledTimes(1)
+      expect(mockCommandExecute).not.toHaveBeenCalled()
+    })
+
+    it('opens templates dialog without loading an empty workflow when mode is "templates"', async () => {
+      withSettings({ 'Comfy.Workflow.NewWorkflowMode': 'templates' })
+
+      await useWorkflowService().loadConfiguredNewWorkflow()
+
+      expect(app.loadGraphData).not.toHaveBeenCalled()
+      expect(mockCommandExecute).toHaveBeenCalledWith('Comfy.BrowseTemplates')
+    })
+
+    it('loads the default sampler workflow when mode is "default"', async () => {
+      withSettings({ 'Comfy.Workflow.NewWorkflowMode': 'default' })
+
+      await useWorkflowService().loadConfiguredNewWorkflow()
+
+      expect(app.loadGraphData).toHaveBeenCalledTimes(1)
+      expect(mockCommandExecute).not.toHaveBeenCalled()
+    })
+
+    it('loads the saved workflow when mode is "specific" and path resolves', async () => {
+      const savedState = makeWorkflowData({ origin: 'saved' })
+      const saved = {
+        path: 'workflows/favorite.json',
+        isLoaded: true,
+        activeState: savedState,
+        changeTracker: { reset: vi.fn(), restore: vi.fn() }
+      } as unknown as ComfyWorkflow
+      vi.spyOn(workflowStore, 'getWorkflowByPath').mockReturnValue(saved)
+
+      withSettings({
+        'Comfy.Workflow.NewWorkflowMode': 'specific',
+        'Comfy.Workflow.NewWorkflowPath': 'workflows/favorite.json'
+      })
+
+      await useWorkflowService().loadConfiguredNewWorkflow()
+
+      expect(workflowStore.getWorkflowByPath).toHaveBeenCalledWith(
+        'workflows/favorite.json'
+      )
+      expect(app.loadGraphData).toHaveBeenCalledTimes(1)
+      expect(app.loadGraphData).toHaveBeenCalledWith(savedState)
+      expect(mockCommandExecute).not.toHaveBeenCalled()
+    })
+
+    it('falls back to blank when mode is "specific" but path is empty', async () => {
+      const lookupSpy = vi.spyOn(workflowStore, 'getWorkflowByPath')
+      withSettings({
+        'Comfy.Workflow.NewWorkflowMode': 'specific',
+        'Comfy.Workflow.NewWorkflowPath': ''
+      })
+
+      await useWorkflowService().loadConfiguredNewWorkflow()
+
+      expect(lookupSpy).not.toHaveBeenCalled()
+      expect(app.loadGraphData).toHaveBeenCalledTimes(1)
+    })
+
+    it('falls back to blank when the chosen workflow has been deleted', async () => {
+      vi.spyOn(workflowStore, 'getWorkflowByPath').mockReturnValue(null)
+      withSettings({
+        'Comfy.Workflow.NewWorkflowMode': 'specific',
+        'Comfy.Workflow.NewWorkflowPath': 'workflows/missing.json'
+      })
+
+      await useWorkflowService().loadConfiguredNewWorkflow()
+
+      expect(workflowStore.getWorkflowByPath).toHaveBeenCalledWith(
+        'workflows/missing.json'
+      )
+      expect(app.loadGraphData).toHaveBeenCalledTimes(1)
     })
   })
 })

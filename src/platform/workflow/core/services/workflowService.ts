@@ -22,6 +22,7 @@ import { useWorkflowThumbnail } from '@/renderer/core/thumbnail/useWorkflowThumb
 import { app } from '@/scripts/app'
 import { blankGraph, defaultGraph } from '@/scripts/defaultGraph'
 import { useDialogService } from '@/services/dialogService'
+import { useCommandStore } from '@/stores/commandStore'
 import { useAppMode } from '@/composables/useAppMode'
 import type { AppMode } from '@/composables/useAppMode'
 import { useDomWidgetStore } from '@/stores/domWidgetStore'
@@ -224,6 +225,38 @@ export const useWorkflowService = () => {
   }
 
   /**
+   * Load the workflow configured by the user as their "new workflow" default.
+   * Falls back to blank if mode is `specific` but the chosen workflow is missing.
+   */
+  const loadConfiguredNewWorkflow = async () => {
+    const mode = settingStore.get('Comfy.Workflow.NewWorkflowMode')
+
+    if (mode === 'specific') {
+      const path = settingStore.get('Comfy.Workflow.NewWorkflowPath')
+      const workflow = path ? workflowStore.getWorkflowByPath(path) : null
+      if (workflow) {
+        if (!workflow.isLoaded) await workflow.load()
+        await app.loadGraphData(
+          toRaw(workflow.activeState) as ComfyWorkflowJSON
+        )
+        return
+      }
+    }
+
+    if (mode === 'templates') {
+      await useCommandStore().execute('Comfy.BrowseTemplates')
+      return
+    }
+
+    if (mode === 'default') {
+      await loadDefaultWorkflow()
+      return
+    }
+
+    await loadBlankWorkflow()
+  }
+
+  /**
    * Reload the current workflow
    * This is used to refresh the node definitions update, e.g. when the locale changes.
    */
@@ -297,9 +330,10 @@ export const useWorkflowService = () => {
 
     workflowDraftStore.removeDraft(workflow.path)
 
-    // If this is the last workflow, create a new default temporary workflow
+    // If this is the last workflow, create a new temporary workflow per the
+    // user's "new workflow default" setting.
     if (workflowStore.openWorkflows.length === 1) {
-      await loadDefaultWorkflow()
+      await loadConfiguredNewWorkflow()
     }
     // If this is the active workflow, load the most recent workflow from history
     if (workflowStore.isActive(workflow)) {
@@ -429,7 +463,8 @@ export const useWorkflowService = () => {
    */
   const afterLoadNewGraph = async (
     value: string | ComfyWorkflow | null,
-    workflowData: ComfyWorkflowJSON
+    workflowData: ComfyWorkflowJSON,
+    options: { openSource?: string } = {}
   ) => {
     const workflowStore = useWorkspaceStore().workflow
     const { isAppMode } = useAppMode()
@@ -449,8 +484,12 @@ export const useWorkflowService = () => {
     if (value === null || typeof value === 'string') {
       const path = value as string | null
 
-      // Check if a persisted workflow with this path exists
-      if (path) {
+      // Check if a persisted workflow with this path exists.
+      // Templates always load into a fresh tab, never reuse — picking the
+      // same template twice should produce two visible tabs, even if the
+      // path collides with a recently-closed temp workflow that's still
+      // referenced by activeWorkflow.
+      if (path && options.openSource !== 'template') {
         const fullPath = ComfyWorkflow.basePath + appendJsonExt(path)
         const existingWorkflow = workflowStore.getWorkflowByPath(fullPath)
 
@@ -614,6 +653,7 @@ export const useWorkflowService = () => {
     saveWorkflow,
     loadDefaultWorkflow,
     loadBlankWorkflow,
+    loadConfiguredNewWorkflow,
     reloadCurrentWorkflow,
     openWorkflow,
     closeWorkflow,
