@@ -166,7 +166,7 @@ export function useWorkflowPersistenceV2() {
       await useWorkflowService().loadBlankWorkflow()
       await useCommandStore().execute('Comfy.BrowseTemplates')
     } else {
-      await comfyApp.loadGraphData()
+      await useWorkflowService().loadConfiguredNewWorkflow()
     }
   }
 
