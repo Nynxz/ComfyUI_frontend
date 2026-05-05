@@ -121,12 +121,12 @@ export function useCoreCommands(): ComfyCommand[] {
     {
       id: 'Comfy.NewBlankWorkflow',
       icon: 'pi pi-plus',
-      label: 'New Blank Workflow',
+      label: 'New Workflow',
       menubarLabel: 'New',
       category: 'essentials' as const,
       function: async () => {
         const previousWorkflowHadNodes = app.rootGraph._nodes.length > 0
-        await workflowService.loadBlankWorkflow()
+        await workflowService.loadConfiguredNewWorkflow()
         telemetry?.trackWorkflowCreated({
           workflow_type: 'blank',
           previous_workflow_had_nodes: previousWorkflowHadNodes
